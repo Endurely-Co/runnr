@@ -3,34 +3,126 @@
 <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/login.css' />
+    <link rel='stylesheet' href='/stylesheets/toast.css' />
 </head>
-<body>
+<body id="loginBody">
 
 <h2>Login Form</h2>
 
-<form action="/action_page.php" method="post">
+<form id="createSignInForm">
     <div class="imgcontainer">
         <img src="https://www.w3schools.com/howto/img_avatar2.png"
              alt="Avatar" class="avatar" style="width:200px;height: 200px">
     </div>
 
+
     <div class="container">
-        <label for="uname"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="uname" required>
+        <label for="email"><b>Email Address</b></label>
+        <input type="text" placeholder="Enter Email" id="email" name="email" required>
 
-        <label for="psw"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="psw" required>
+        <label for="name"><b>Full name</b></label>
+        <input type="text" id="name" placeholder="Enter Full Name" name="name" required>
 
-        <button type="submit">Login</button>
-        <label>
-            <input type="checkbox" checked="checked" name="remember"> Remember me
-        </label>
+        <!--        <label for="psw"><b>Password</b></label>-->
+        <!--        <input type="password" placeholder="Enter Password" name="psw" required>-->
+
+        <button type="submit">Sign In</button>
     </div>
 
     <div class="container" style="background-color:#f1f1f1">
-        <button type="button" class="cancelbtn">Cancel</button>
+        <button type="button" class="signupBtn">Sign Up</button>
         <span class="psw">Forgot <a href="#">password?</a></span>
     </div>
 </form>
+<div id="toast" class="toast"></div>
+
+<script>
+
+    const form = document.getElementById('createSignInForm')
+    const toast = document.getElementById('toast');
+    const status = "<%= status%>";
+
+    function checkLogin(){
+        fetch('/api/check-login', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then((res) => res.json())
+            .then((data) => {
+                hasChecked = true;
+                if(data.error){
+                    showToast("", "error");
+                }else{
+                    const curPath = window.location.pathname;
+                    if(data.redirect_url !== curPath){
+                        window.location.href = data.redirect_url;
+                    }
+                }
+            }).catch((err) => {
+            hasChecked = true;
+            console.log('User not logged in', 'error');
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        checkLogin();
+    });
+
+    function showToast(message, type){
+        console.log('response', message)
+        toast.textContent = message;
+        if(type === 'success'){
+            toast.style.backgroundColor = 'green';
+        }else{
+            toast.style.backgroundColor = 'red';
+        }
+        toast.className = 'toast show';
+
+        setTimeout((event) => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    if(status === 'success'){
+        showToast('Successfully signed up.', status);
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const formData = {
+            email: document.getElementById('email').value,
+            name: document.getElementById('name').value
+        }
+
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => {
+                return response.json()
+            })
+            .then(data =>{
+                if(data.error){
+                    showToast(data.error, 'error');
+                }else{
+                     window.location.href =data.redirectUrl;
+                     form.reset();
+                }
+            })
+            .catch(err =>{
+                showToast('An unexpected error occurred!', 'error');
+            });
+    });
+
+
+
+</script>
+
 </body>
 </html>

@@ -30,6 +30,15 @@ button:hover {
     background-color: #f44336;
 }
 
+.signupBtn {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #ffffff;
+    border: 1px solid #00a215;
+    color: #00a215;
+    font-weight: bold;
+}
+
 .imgcontainer {
     text-align: center;
     margin: 24px 0 12px 0;

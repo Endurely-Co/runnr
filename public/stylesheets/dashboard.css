@@ -1,0 +1,45 @@
+.dashboard{
+    width: 100vh;
+}
+
+
+.time-container{
+    align-content: center;
+}
+
+.timer{
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 60pt;
+    text-align: center;
+}
+
+
+.controls{
+    align-content: center;
+    width: 100%;
+}
+
+
+.ctr-button{
+    width: 8vh;
+    height: 8vh;
+    border-radius: 50%;
+    display: inline-block;
+    color: white;
+    font-weight: bold;
+    font-size: 16pt;
+    border-color: white;
+}
+
+
+.ctr-button.start{
+    background-color: green;
+}
+
+.ctr-button.stop{
+    background-color: red;
+}
+
+.ctr-button.lap{
+    background-color: yellow;
+}

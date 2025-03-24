@@ -2,10 +2,85 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/stylesheets/dashboard.css' />
   </head>
-  <body>
+  <body id="createSignInForm">
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <div id="timerContainer" class="timer-container">
+      <p class="timer" id="timer">12:22:02.129</p>
+      <div class="controls">
+        <button id="startPause" type="button" class="ctr-button start">Start</button>
+        <button id="lapse" type="button" class="ctr-button lap">Lapse</button>
+        <button id="stop" type="button" class="ctr-button stop">Stop</button>
+      </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+  <button id='logout'>Logout</button>
+    <script>
+      const logoutBtn = document.getElementById('logout')
+      const toast = document.getElementById('toast');
+      let hasChecked = false;
+
+      function checkLogin(){
+        fetch('/api/check-login', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).then((res) => res.json())
+                .then((data) => {
+                  hasChecked = true;
+                  if(data.error){
+                    showToast("", "error");
+                  }else{
+                    const curPath = window.location.pathname;
+                    if(data.redirect_url !== curPath){
+                      window.location.href = data.redirect_url;
+                    }
+                  }
+                }).catch((err) => {
+          hasChecked = true;
+          console.log('User not logged in', 'error');
+        });
+      }
+
+
+      document.addEventListener('DOMContentLoaded', () => {
+        checkLogin();
+      });
+
+      function showToast(message, type){
+        toast.textContent = message;
+        if(type === 'success'){
+          toast.style.backgroundColor = 'green';
+        }else{
+          toast.style.backgroundColor = 'red';
+        }
+        toast.className = 'toast show';
+
+        setTimeout((event) => {
+          toast.className = 'toast';
+        }, 3000);
+      }
+
+
+      logoutBtn.addEventListener('click', () => {
+        fetch('/api/signout', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json())
+                .then(data => {
+                  window.location.href = data.redirect_url;
+                }).catch(err => {
+                  showToast(err, 'error');
+        });
+
+      });
+    </script>
+
   </body>
+
 </html>

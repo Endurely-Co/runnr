@@ -11,24 +11,38 @@
     font-family: 'Times New Roman', Times, serif;
     font-size: 60pt;
     text-align: center;
+    width: 100vw;
+    height: fit-content;
 }
 
 
 .controls{
     align-content: center;
-    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: fit-content;
+    gap: 15px;
 }
 
 
 .ctr-button{
-    width: 8vh;
-    height: 8vh;
+    width: 10vw;
+    height: 10vw;
+    max-width: 80px;
+    max-height: 80px;
+    min-width: 50px;
+    min-height: 50px;
     border-radius: 50%;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: white;
     font-weight: bold;
-    font-size: 16pt;
-    border-color: white;
+    font-size: clamp(12px, 2vw, 16pt);
+    border: 2px solid white;
+    cursor: pointer;
+    text-align: center;
 }
 
 
@@ -42,4 +56,27 @@
 
 .ctr-button.lap{
     background-color: yellow;
+    color: black;
 }
+
+ul {
+    list-style-type: none;
+}
+
+
+/*@property --num {*/
+/*    syntax: '<integer>';*/
+/*    initial-value: 0;*/
+/*    inherits: false;*/
+/*}*/
+
+/*p {*/
+/*    transition: --num 1s;*/
+/*    counter-reset: num var(--num);*/
+/*}*/
+/*p:hover {*/
+/*    --num: 10000;*/
+/*}*/
+/*p::after {*/
+/*    content: counter(num);*/
+/*}*/

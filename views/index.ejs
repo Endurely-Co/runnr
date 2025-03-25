@@ -1,86 +1,213 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/dashboard.css' />
-  </head>
-  <body id="createSignInForm">
-    <h1><%= title %></h1>
-    <div id="timerContainer" class="timer-container">
-      <p class="timer" id="timer">12:22:02.129</p>
-      <div class="controls">
-        <button id="startPause" type="button" class="ctr-button start">Start</button>
-        <button id="lapse" type="button" class="ctr-button lap">Lapse</button>
-        <button id="stop" type="button" class="ctr-button stop">Stop</button>
-      </div>
-    </div>
-    <div class="toast" id="toast"></div>
+<head>
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/dashboard.css' />
+</head>
+<body id="createSignInForm">
+<h1><%= title %></h1>
+<div id="timerContainer" class="timer-container">
+  <p class="timer" id="timer">00:00:00.000</p>
+  <div class="controls">
+    <button id="startPause" type="button" class="ctr-button start">Start</button>
+    <button id="lapse" type="button" class="ctr-button lap">Lapse</button>
+    <button id="stop" type="button" class="ctr-button stop">Stop</button>
+  </div>
+  <div id="lapses-container"></div>
 
-  <button id='logout'>Logout</button>
-    <script>
-      const logoutBtn = document.getElementById('logout')
-      const toast = document.getElementById('toast');
-      let hasChecked = false;
+  <div>
+    <ul id="lapses"></ul>
+  </div>
 
-      function checkLogin(){
-        fetch('/api/check-login', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }).then((res) => res.json())
-                .then((data) => {
-                  hasChecked = true;
-                  if(data.error){
-                    showToast("", "error");
-                  }else{
-                    const curPath = window.location.pathname;
-                    if(data.redirect_url !== curPath){
-                      window.location.href = data.redirect_url;
-                    }
-                  }
-                }).catch((err) => {
-          hasChecked = true;
-          console.log('User not logged in', 'error');
-        });
-      }
+</div>
+<div class="toast" id="toast"></div>
+
+<button id='logout'>Logout</button>
+<script>
+  const logoutBtn = document.getElementById('logout')
+  const toast = document.getElementById('toast');
+  const startBtn = document.getElementById('startPause');
+  const stopBtn = document.getElementById('stop');
+  const lapseBtn = document.getElementById('lapse');
+  const timer = document.getElementById('timer');
+  const lapsesNode = document.getElementById('lapses');
+  const lapsesContainer = document.getElementById('lapses-container');
+  // const lapseTemplate = document.getElementById("template");
+
+ // let lapses = [];
+  let intervalId;
+  let startedTime = null;
+  let elapsedTime =0;
+  let clockNow =0;
+  let isRunning = false;
+  const startText = 'Start';
+
+  lapseBtn.addEventListener('click', addNewLapse);
+
+  function addNewLapse(event){
+    if (isRunning){
+      let li = document.createElement('li');
+      li.appendChild(document.createTextNode(timer.textContent));
+      lapsesNode.appendChild(li);
+    }
+  }
+
+  function pauseTimer() {
+    if(isRunning && intervalId){
+      startBtn.textContent = "Resume";
+      clearInterval(intervalId);
+      intervalId = null;
+      elapsedTime = Date.now() - startedTime;
+      console.log("pause", clockNow);
+      isRunning = false;
+    }
+  }
 
 
-      document.addEventListener('DOMContentLoaded', () => {
-        checkLogin();
-      });
 
-      function showToast(message, type){
-        toast.textContent = message;
-        if(type === 'success'){
-          toast.style.backgroundColor = 'green';
-        }else{
-          toast.style.backgroundColor = 'red';
-        }
-        toast.className = 'toast show';
+  function startTimer() {
+    if(!isRunning && !intervalId){
+      startedTime = Date.now() - elapsedTime;
+      intervalId = setInterval(updateClock, 10)
+      startBtn.textContent = "Pause"
+      isRunning = true;
+    }
+  }
 
-        setTimeout((event) => {
-          toast.className = 'toast';
-        }, 3000);
-      }
+  function stopTimer() {
+    startBtn.textContent = startText
+    clearInterval(intervalId);
+    elapsedTime = 0;
+    startedTime =0;
+    isRunning = false;
+    intervalId = null;
+    for (let i = 0; i < lapsesNode.children.length; i++) {
+      lapsesNode.removeChild(lapsesNode.children.item(i));
+    }
+
+    let index = 0;
+    // while (lapsesNode.children){
+    //   lapsesNode.children.
+    // }
+    updateClock(true);
+  }
+
+  function updateClock(reset = false) {
+    if(reset){
+      timer.textContent = '00:00:00.000';
+      return;
+    }
+    const clockNow = new Date(Date.now() - startedTime);
+    timer.textContent = `${padTime(clockNow.getUTCHours())}:${padTime(clockNow.getUTCMinutes())}:${padTime(clockNow.getUTCSeconds())}.${padTimeMs(clockNow.getMilliseconds())}`;
+  }
+
+  function padTimeMs(value){
+    const valueStr = value.toString();
+
+    if(valueStr.length < 2){
+      return `00${value}`;
+    }
+    if(valueStr.length < 3){
+      return `0${value}`;
+    }
+
+    return `${value}`;
+  }
+
+  function padTime(value){
+    if(value < 10){
+      return `0${value}`;
+    }
+    return `${value}`;
+  }
+
+  Number.prototype.toTimeString = function(seconds) {
+    let twentyFourHrs = 8.64e7;  // 24*60*60*1000
+
+    let ms = seconds ? this * 1000 : this,
+            endPos = ~(4 * !!seconds),  // to trim "Z" or ".sssZ"
+            timeString = new Date(ms).toISOString().slice(11, endPos);
+
+    if (ms >= twentyFourHrs) {  // to extract ["hh", "mm:ss[.mss]"]
+      let parts = timeString.split(/:(?=\d{2}:)/);
+      parts[0] -= -24 * Math.floor(ms / twentyFourHrs);
+      timeString = parts.join(":");
+    }
+
+    return timeString;
+  };
+
+  startBtn.addEventListener('click', () =>{
+    console.log('start');
+    if([startText, 'Resume'].includes(startBtn.textContent)){
+      startTimer();
+    }else{
+      pauseTimer();
+    }
+  });
+
+  stopBtn.addEventListener('click', stopTimer);
 
 
-      logoutBtn.addEventListener('click', () => {
-        fetch('/api/signout', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }).then(res => res.json())
-                .then(data => {
+  // `00:00:00.000`
+
+  function checkLogin(){
+    fetch('/api/check-login', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then((res) => res.json())
+            .then((data) => {
+              if(data.error){
+                showToast("", "error");
+              }else{
+                const curPath = window.location.pathname;
+                if(data.redirect_url !== curPath){
                   window.location.href = data.redirect_url;
-                }).catch(err => {
-                  showToast(err, 'error');
-        });
+                }
+              }
+            }).catch((err) => {
+      console.log('User not logged in', 'error');
+    });
+  }
 
-      });
-    </script>
 
-  </body>
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLogin();
+  });
+
+  function showToast(message, type){
+    toast.textContent = message;
+    if(type === 'success'){
+      toast.style.backgroundColor = 'green';
+    }else{
+      toast.style.backgroundColor = 'red';
+    }
+    toast.className = 'toast show';
+
+    setTimeout((event) => {
+      toast.className = 'toast';
+    }, 3000);
+  }
+
+
+  logoutBtn.addEventListener('click', () => {
+    fetch('/api/signout', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(res => res.json())
+            .then(data => {
+              window.location.href = data.redirect_url;
+            }).catch(err => {
+      showToast(err, 'error');
+    });
+
+  });
+</script>
+
+</body>
 
 </html>

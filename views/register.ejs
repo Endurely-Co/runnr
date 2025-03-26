@@ -24,7 +24,19 @@
 
 <!--        <label for="psw"><b>Password</b></label>-->
 <!--        <input type="password" placeholder="Enter Password" name="psw" required>-->
+        <fieldset>
+            <legend>What are you signing up for:</legend>
+            <div>
+                <input type="radio" id="organiserChoice" name="userType" value="organiser" />
+                <label for="organiserChoice">Organiser</label>
 
+                <input type="radio" id="volunteerChoice" name="userType" value="volunteer" />
+                <label for="volunteerChoice">Volunteer</label>
+
+                <input type="radio" id="runnerChoice" name="userType" value="runner" />
+                <label for="runnerChoice">Runner</label>
+            </div>
+        </fieldset>
         <button type="submit">Sign Up</button>
     </div>
 
@@ -54,9 +66,12 @@
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
+        const userType = document.querySelector('input[name=userType]:checked');
+
         const formData = {
             email: document.getElementById('email').value,
-            name: document.getElementById('name').value
+            name: document.getElementById('name').value,
+            user_type: userType.value,
         }
         fetch('/api/create_user', {
             method: 'POST',

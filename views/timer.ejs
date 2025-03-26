@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %></title>
   <link rel='stylesheet' href='/stylesheets/dashboard.css' />
 </head>
@@ -46,8 +47,9 @@
 
   function addNewLapse(event){
     if (isRunning){
-      let li = document.createElement('li');
-      li.appendChild(document.createTextNode(timer.textContent));
+      let li = document.createElement('ol');
+      li.className = 'rounded-list';
+      li.appendChild(document.createTextNode('Lap: ' + timer.textContent));
       lapsesNode.appendChild(li);
     }
   }
@@ -81,14 +83,10 @@
     startedTime =0;
     isRunning = false;
     intervalId = null;
-    for (let i = 0; i < lapsesNode.children.length; i++) {
-      lapsesNode.removeChild(lapsesNode.children.item(i));
-    }
 
-    let index = 0;
-    // while (lapsesNode.children){
-    //   lapsesNode.children.
-    // }
+    while (lapsesNode.hasChildNodes()){
+      lapsesNode.removeChild(lapsesNode.firstChild);
+    }
     updateClock(true);
   }
 

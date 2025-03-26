@@ -9,7 +9,7 @@
 
 .timer{
     font-family: 'Times New Roman', Times, serif;
-    font-size: 60pt;
+    font-size: 50pt;
     text-align: center;
     width: 100vw;
     height: fit-content;
@@ -29,10 +29,10 @@
 .ctr-button{
     width: 10vw;
     height: 10vw;
-    max-width: 80px;
-    max-height: 80px;
-    min-width: 50px;
-    min-height: 50px;
+    max-width: 90px;
+    max-height: 90px;
+    min-width: 60px;
+    min-height: 60px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -43,6 +43,7 @@
     border: 2px solid white;
     cursor: pointer;
     text-align: center;
+    padding: 10px;
 }
 
 
@@ -64,6 +65,29 @@ ul {
 }
 
 
+ol {
+    /* numeric */
+    counter-reset: li; /* Initiate a counter */
+    list-style: none; /* Remove default numbering */
+    *list-style: decimal; /* Keep using default numbering for IE6/7 */
+    font: 15px 'trebuchet MS', 'lucida sans';
+    padding: 0;
+    margin-bottom: 4em;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+}
+
+.rounded-list{
+    position: relative;
+    display: block;
+    padding: .4em .4em .4em 2em;
+    *padding: .4em;
+    margin: .5em 0;
+    background: #ddd;
+    color: #444;
+    text-decoration: none;
+    border-radius: .3em;
+    transition: all .3s ease-out;
+}
 /*@property --num {*/
 /*    syntax: '<integer>';*/
 /*    initial-value: 0;*/

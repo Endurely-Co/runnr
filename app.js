@@ -31,8 +31,67 @@ app.use('/', indexRouter);
 
 const CACHE_USER = 'user'
 const loginRoute = '/login'
+const runnerRoute = '/runner'
+const organiserRoute = '/organiser'
+const apiBase = '/api'
 
 
+const db = new Pool({
+  user: 'postgres',  // Change as needed
+  host: '127.0.0.1',
+  database: 'postgres',
+  password: '1234567',
+  port: 5432
+});
+
+
+// Connect to Database
+db.connect((err) => {
+  if (err) {
+    console.error('Database connection failed: ', err.stack);
+    return;
+  }
+  console.log('Connected to database.');
+});
+
+function runningUser(req, res){
+  return res.get('runner_screen', {title: "Runner's home"})
+}
+
+async function addNewRace(req, res){
+  const {user_id, name, loop_km, start_time, cutoff_time} = req.body;
+  try{
+    const result = await db.query("INSERT INTO race(name, loop_km, start_time, cutoff_time, user_id) VALUES($1, $2, $3, $4, $5)",
+        [name, loop_km, start_time, cutoff_time, user_id]);
+    if(result.error){
+      return res.status(404).json({ error: result.error.message });
+    }
+
+    res.status(201).json(req.body);
+  }catch (error){
+    res.status(500).send({error: error.message});
+  }
+}
+
+async function getLatestRace(req, res){
+  try{
+    const result = await db.query("SELECT * FROM race ORDER BY start_time DESC LIMIT 1");
+    if(result.error){
+      return res.status(404).json({ error: result.error.message });
+    }
+    res.status(201).json(result.rows[0]);
+  }catch (error){
+    res.status(500).send({error: error.message});
+  }
+}
+
+app.get('/api/organiser', getLatestRace);
+app.post("/api/organiser", addNewRace)
+app.get(runnerRoute, runningUser);
+
+app.get('/new-race', (req, res) => {
+  return res.render('new_race', {title: 'Add New Race'});
+});
 
 app.get(loginRoute, (req, res) => {
 
@@ -40,7 +99,7 @@ app.get(loginRoute, (req, res) => {
   res.render('login', { title: 'Login', status});
 });
 
-app.get('/api/check-login', (req, res) => {
+app.get(`/api/check-login`, (req, res) => {
   if (localStorage.getItem(CACHE_USER) != null) {
     res.status(200).send({
       redirect_url: '/',
@@ -63,23 +122,6 @@ app.get('/signup', (req, res) => {
 
 module.exports = app;
 
-const db = new Pool({
-  user: 'postgres',  // Change as needed
-  host: '127.0.0.1',
-  database: 'postgres',
-  password: '1234567',
-  port: 5432
-});
-
-
-// Connect to Database
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed: ', err.stack);
-    return;
-  }
-  console.log('Connected to database.');
-});
 
 app.post('/api/login', async (req, res) => {
   try{
@@ -129,11 +171,15 @@ app.post('/api/create_user', (req, res) => {
       }
       res.status(500).json({error: 'Database error'});
     }else{
+
       res.json({ message: 'User added!', userId: result.insertId,  redirectUrl: "/login/?status=success" });
     }
   });
 });
 
+app.all('/api/*', (req, res) => {
+  res.status(500).json({error: "API cannot be found"});
+});
 
 // // error handler
 // app.use(function(err, req, res, next) {

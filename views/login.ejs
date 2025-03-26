@@ -30,7 +30,7 @@
     </div>
 
     <div class="container" style="background-color:#f1f1f1">
-        <button type="button" class="signupBtn">Sign Up</button>
+        <button type="button" class="signupBtn", id="signupBtn">Sign Up</button>
         <span class="psw">Forgot <a href="#">password?</a></span>
     </div>
 </form>
@@ -38,7 +38,8 @@
 
 <script>
 
-    const form = document.getElementById('createSignInForm')
+    const form = document.getElementById('createSignInForm');
+    const signupBtn = document.getElementById('signupBtn');
     const toast = document.getElementById('toast');
     const status = "<%= status%>";
 
@@ -50,7 +51,6 @@
             },
         }).then((res) => res.json())
             .then((data) => {
-                hasChecked = true;
                 if(data.error){
                     showToast("", "error");
                 }else{
@@ -60,7 +60,6 @@
                     }
                 }
             }).catch((err) => {
-            hasChecked = true;
             console.log('User not logged in', 'error');
         });
     }
@@ -68,6 +67,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         checkLogin();
+    });
+
+    signupBtn.addEventListener('click', () => {
+        window.location.href = '/signup';
     });
 
     function showToast(message, type){
